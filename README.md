@@ -13,8 +13,3 @@ This is a self-extracting dtx file, so run
 to generate the README, documentation, and packages.
 
 
-
-
-
-
-

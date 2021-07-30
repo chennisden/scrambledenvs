@@ -113,9 +113,12 @@ This package consists of the file scrambledenvs.dtx,
     \expandafter\endgroup
 \fi
 %</internal>
-%<main>\NeedsTeXFormat{LaTeX2e}
-%<main>\ProvidesPackage{scrambledenvs}
-%<main>[2021/07/29 v1.0.0 Create and print scrambled environments]
+%<*main>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{scrambledenvs}[2021/07/29 v1.0.0 Create and print scrambled environments]
+\RequirePackage{fancyvrb}
+\RequirePackage{pgffor}
+%</main>
 %<*driver>
 \ProvidesFile{\jobname.dtx}[2021/07/29 v1.0.0 Create and print scrambled environments]
 \documentclass{ltxdoc}
@@ -134,6 +137,8 @@ This package consists of the file scrambledenvs.dtx,
 % \GetFileInfo{\jobname.dtx}
 % \changes{v1.0.0}{2021/07/29}{Initial version}
 %
+% \renewcommand{\emph}[1]{\textbf{#1}}
+%
 % \title{\textsf{scrambledenvs} -- Create and print scrambled environments}
 % \author{Dennis Chen \\ proofprogram@gmail.com}
 % \date{\fileversion{} (\filedate)}
@@ -148,7 +153,7 @@ This package consists of the file scrambledenvs.dtx,
 %
 % This package was designed to mark hints at a location\footnote{It can generalize beyond hints, but I thought it best to start off with a specific example..} and print them out later in a random order.\footnote{Though you do have the ability to make the order not random: pass in |noscramble| to the package.}
 %
-% There is an outer environment which typesets the label. Inside it you should place the inner environment \textbf{and only the inner environment}. Inside this inner environment, you write the contents of your hint. This will typeset the hint number. Finally, you may print the hints at some later location in a randomized order.
+% There is an outer environment which typesets the label. Inside it you should place the inner environment \emph{and only the inner environment}. Inside this inner environment, you write the contents of your hint. This will typeset the hint number. Finally, you may print the hints at some later location in a randomized order.
 %
 % \section{Usage}
 %
@@ -166,14 +171,13 @@ This package consists of the file scrambledenvs.dtx,
 \newif\ifscrambledenvs@scramble
 \scrambledenvs@scrambletrue
 
-\DeclareOption{nosscramble}{\scrambledenvs@scramblefalse}
+\DeclareOption{noscramble}{\scrambledenvs@scramblefalse}
 \ProcessOptions\relax
 
 %</main>
 % \fi
 %
 % \DescribeMacro{\newscrambledenv}
-%
 % In order to create a new scrambled environment, one should call |\newscrambledenv{envname}|. This requires that the macros |\envname| and |\envname|s be undefined, as well as the counters \textsf{envname}count and \textsf{envname}tempcount be undefined, as |\newscrambledenv| will define these.
 %
 % This defines the environments |`envname`s| and |`envname`|, and the macro |\print`envname`|, where |`envname'| denotes the value passed in to |\newscrambledenv|. Because this will get confusing fast, we will just assume that |`envname'| is |hint|, since this generalizes quite easily.
@@ -209,31 +213,186 @@ This package consists of the file scrambledenvs.dtx,
 }
 %</helper>
 % \fi
-
 % \DescribeEnv{hints}
-
-% This is the outer environment. Depending on how many |hint| environments are put inside it, it will either typeset \textbf{Hints:} or \textbf{Hint:} with the numerical labels of the passed in hints following it.
-
+% This is the outer environment. Depending on how many |hint| environments are put inside it, it will either typeset \emph{Hints:} or \emph{Hint:} with the numerical labels of the passed in hints following it.
 % You should put in nothing but the inner environment |hint|. (See the examples for a correct usage.)
-
 % \iffalse
+%<*helper>
+\def\scrambledenvs@active{}
+%</helper>
 %<*main>
 \newenvironment{#1s}{%
-\setcounter{scrambledenvs@#1@tempcount}{0}%
+    \setcounter{scrambledenvs@#1@tempcount}{0}%
+    \def\scrambledenvs@active{#1}%
+    \unskip\ignorespaces%
 }
-{%
+{
 \ifnum\csname c@scrambledenvs@#1@tempcount\endcsname=0
 \else
     \ifnum\csname c@scrambledenvs@#1@tempcount\endcsname=1
-        {\csname scrambledenvs@#1labelformat\endcsname\MakeUppercase #1:}
+        {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname :}
+        {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\csname thescrambledenvs@#1@count\endcsname}}%
     \else
-        {\csname scrambledenvs@#1labelformat\endcsname\MakeUppercase #1s:}
+        {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname s:}%
+        \foreach \scrambledenvs@index in {\the\numexpr\csname thescrambledenvs@#1@count\endcsname-\csname thescrambledenvs@#1@tempcount\endcsname+1\relax, ..., \csname thescrambledenvs@#1@count\endcsname} {
+            {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\scrambledenvs@index}}%
+        }
     \fi
 \fi
+\setcounter{scrambledenvs@#1@tempcount}{0}%
 }
 %</main>
 % \fi
+%
+% \DescribeEnv{hint}
+% This is the inner environment. The inner environment |hint| \emph{must} be inside the outer environment |hints|.
+% \iffalse
+%<*main>
+\newenvironment{#1}{%
+    \stepcounter{scrambledenvs@#1@tempcount}%
+    \stepcounter{scrambledenvs@#1@count}%
+    \ifnum\pdfstrcmp{#1}{\scrambledenvs@active}=0
+    \else
+        \PackageError{scrambledenvs}{The inner environment `#1' must be inside the outer environment `#1s'}{}
+    \fi
+    \def\scrambledenvs@active{}
+    \unskip%
+    \VerbatimOut{\jobname-\csname thescrambledenvs@#1@count\endcsname.#1}% This comment symbol is absolutely necessary; VerbatimOut will throw an error otherwise!
+}
+{%
+    \endVerbatimOut%
+    \def\scrambledenvs@active{#1}%
+}
+%</main>
+% \fi
+%
+% \DescribeMacro{\printhint}
+%
+% To print out the hints (either in a random or fixed order, depending on whether the option |noscrambled| is passed in), just write |\printhint|.
+% \iffalse
+%<*main>
+%% End document hooks to write # of sol files to aux
+\AtEndDocument{
+    \immediate\write\@auxout{\string\gdef\noexpand\csname scrambledenvs@#1@auxcount\endcsname{\csname thescrambledenvs@#1@count\endcsname}}
+}
+\newcommand{print#1}{%
+    \begin{scrambledenvs@#1@printenv}
 
+    \end{scrambledenvs@#1@printenv}%
+}
+%</main>
+% \fi
+%
+% \subsection{Formatting}
+%
+% There are five pieces of configurable formatting. They are roughly ordered by the order they would appear in a document.
+%
+% \DescribeMacro{\hintlabel}
+% First is the label ``Hint(s)'' which gets printed by the outer environment |hints|. Capitalization and singular/plural form is automatically taken care of. To change it, write |\hintlabel{new label}| to get ``New label(s)'' as the new label.
+%
+% By default the label is the environment name capitalized. This may be useful if your environment names are shortened: for instance, you could change the label of |solu| to ``Solution(s)'' instead.
+%
+% \iffalse
+%<*main>
+\expandafter\def\csname scrambledenvs@#1@label\endcsname{\MakeUppercase #1}
+\scrambledenvs@check@macrodefined{#1label}
+\expandafter\newcommand\csname #1label\endcsname[1]{\expandafter\def\csname scrambledenvs@#1@label\endcsname{\MakeUppercase ##1}}
+%</main>
+% \fi
+%
+% \DescribeMacro{\hintlabelfont}
+% Second is the font of the label. To change it, write |\hintlabelfont{new label font}| to apply the new font. By default the font applied is |\bfseries|.
+%
+% Because this macro only takes in one argument, it is advisable to use |\bfseries| instead of |\textbf|, for instance.
+%
+% \iffalse
+%<*main>
+\expandafter\def\csname scrambledenvs@#1@labelfont\endcsname{\scrambledenvs@labelfont}
+\scrambledenvs@check@macrodefined{#1labelfont}
+\expandafter\newcommand\csname #1labelfont\endcsname[1]{\expandafter\def\csname scrambledenvs@#1@labelfont\endcsname{##1}}
+%</main>
+% \fi
+%
+% \DescribeMacro{\hintreffont}
+% Sets the font of the numerical references the follows the label.
+%
+% Because the references are generated with |\ref|, you must change hyperref colors in order to change the color. |\color| will not work.
+%
+% \iffalse
+%<*main>
+\expandafter\def\csname scrambledenvs@#1@reffont\endcsname{\scrambledenvs@reffont}
+\scrambledenvs@check@macrodefined{#1reffont}
+\expandafter\newcommand\csname #1reffont\endcsname[1]{\expandafter\def\csname scrambledenvs@#1@reffont\endcsname{##1}}
+%</main>
+% \fi
+%
+% \DescribeMacro{\hintprintenv}
+% When the randomized hints are printed at the end, the actual printed contents are wrapped around an environment. By default the beginning of the environment is |\begin{enumerate}| and the end is |\end{enumerate}|.
+%
+% To change these, write |\hintprintenv{new env beginning}{new env ending}|.
+%
+% \iffalse
+%<*main>
+\newenvironment{scrambledenvs@#1@printenv}{\begin{scrambledenvs@printenv}}{\end{scrambledenvs@printenv}}
+\scrambledenvs@check@envdefined{#1printenv}
+\expandafter\def\csname #1printenv\endcsname#1#2{\renewenvironment{scrambledenvs@#1@printenv}{##1}{##2}}
+%</main>
+% \fi
+%
+% \DescribeMacro{\hintprintitem}
+% Each item of the randomized hints is printed with |\hintprintitem| at the beginning. By default it is |\item|.
+%
+% The way this is defined also allows for changing the font of the output. So if you want to bold the hint text, you could write |\hintprintitem{\bfseries\item}|.
+% \iffalse
+%<*main>
+\expandafter\def\csname scrambledenvs@#1@printitem\endcsname{\scrambledenvs@printitem}
+\scrambledenvs@check@macrodefined{#1printitem}
+\expandafter\def\csname #1printitem\endcsname#1{\expandafter\def\csname scrambledenvs@#1@printitem\endcsname{##1}}
+%</main>
+% \fi
+%
+% You may also change the defaults of all these pieces \emph{except the label} with the following macros. (The names of these macros make it impossible to pass in |\newscrambledenv{default}|, but there is no reason to do such a thing anyway.)
+%
+% If, at any point, you change the defaults, \emph{all} fonts/formats that have not been custom-set will be changed, including those of previously defined scrambled environments.
+%
+% Usage is identical to configuring formatting for specific scrambled environments.
+%
+% \DescribeMacro{\defaultlabelfont}
+% Changes the default label font.
+% \iffalse
+%<*helper>
+\def\scrambledenvs@labelfont{\bfseries}
+\def\defaultlabelfont#1{\def\scrambledenvs@lineformat{#1}}
+%</helper>
+% \fi
+%
+% \DescribeMacro{\defaultreffont}
+% Changes the default reference font.
+% \iffalse
+%<*helper>
+\def\scrambledenvs@reffont{}
+\def\defaultreffont#1{\def\scrambledenvs@reffont{#1}}
+%</helper>
+% \fi
+%
+% \DescribeMacro{\defaultprintenv}
+% Changes the default print environment.
+% \iffalse
+%<*helper>
+\newenvironment{scrambledenvs@printenv}{\begin{enumerate}}{\end{enumerate}}
+\def\defaultprintenv#1#2{\renewenvironment{scrambledenvs@printenv}{#1}{#2}}
+%</helper>
+%\fi
+%
+% \DescribeMacro{\defaultprintitem}
+% Changes the formatting of the default print item.
+% \iffalse
+%<*helper>
+\def\scrambledenvs@printitem{\item}
+\def\defaultprintitem#1{\def\scrambledenvs@printitem{#1}}
+%</helper>
+% \fi
+%
 % \section{Examples}
 % In all of the examples, we use |hint| as our generic scrambled environment. 
 % \subsection{A barebones example}
