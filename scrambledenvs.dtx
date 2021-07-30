@@ -1,0 +1,279 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2021 Dennis Chen <proofprogram@gmail.com>
+%
+% This work may be distributed and/or modified under
+% the conditions the LaTeX Project Public License (LPPL),
+% either version 1.3 of this license or (at your option)
+% any later version. The latest version of this license
+% can be found in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+# The LaTeX package scrambledenvs - version 1.0.0 (2021/07/29)
+
+**scrambledenvs** allows you to arbitrarily create and print scrambled environments (like scrambled hints in a book) and customize the output.
+
+## Installation instructions
+
+A working TeX installation is required.
+
+This is a self-extracting dtx file, so run
+
+    pdflatex scrambledenvs.dtx
+
+to generate the README, documentation, and packages.
+%</readme>
+% \fi
+
+% \iffalse
+
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+    \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+
+This is a generated file.
+
+Copyright (C) 2021 Dennis Chen <proofprogram@gmail.com>
+
+This work may be distributed and/or modified under
+the conditions the LaTeX Project Public License (LPPL),
+either version 1.3 of this license or (at your option)
+any later version. The latest version of this license
+can be found in
+
+    http://www.latex-project.org/lppl.txt
+
+and version 1.3 or later is part of all distributions of LaTeX
+version 2005/12/01 or later.
+
+To produce the documentation, run palette.dtx through pdflatex.
+
+\endpreamble
+\postamble
+
+This package consists of the file scrambledenvs.dtx,
+          and the generated files scrambledenvs.sty,
+                                  scrambledenvs.pdf.
+\endpostamble
+
+\usedir{tex/latex/scrambledenvs}
+\generate{
+    \file{scrambledenvs.sty}{\from{\jobname.dtx}{main}\from{\jobname.dtx}{helper}}
+}
+
+\obeyspaces
+\Msg{*************************************************************}
+\Msg{*                                                           *}
+\Msg{* To finish the installation you have to move the following *}
+\Msg{* files into a directory searched by TeX:                   *}
+\Msg{*                                                           *}
+\Msg{*     scrambledenvs.sty                                     *}
+\Msg{*                                                           *}
+\Msg{* To produce the documentation, run the file                *}
+\Msg{* scrambledenvs.dtx through LaTeX.                          *}
+\Msg{*                                                           *}
+\Msg{* Happy TeXing!                                             *}
+\Msg{*                                                           *}
+\Msg{*************************************************************}
+
+%</install>
+%<install>\endbatchfile
+%<*internal>
+
+\usedir{source/latex/scrambledenvs}
+\generate{
+    \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+
+\usedir{doc/latex/scrambledenvs}
+\generate{
+    \file{README.md}{\from{\jobname.dtx}{readme}}
+}
+
+\ifx\fmtname\nameofplainTeX
+    \expandafter\endbatchfile
+\else
+    \expandafter\endgroup
+\fi
+%</internal>
+%<main>\NeedsTeXFormat{LaTeX2e}
+%<main>\ProvidesPackage{scrambledenvs}
+%<main>[2021/07/29 v1.0.0 Create and print scrambled environments]
+%<*driver>
+\ProvidesFile{\jobname.dtx}[2021/07/29 v1.0.0 Create and print scrambled environments]
+\documentclass{ltxdoc}
+
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+
+\begin{document}
+    \DocInput{\jobname.dtx}
+    \PrintIndex
+    \PrintChanges
+\end{document}
+%</driver>
+% \fi
+% \GetFileInfo{\jobname.dtx}
+% \changes{v1.0.0}{2021/07/29}{Initial version}
+%
+% \title{\textsf{scrambledenvs} -- Create and print scrambled environments}
+% \author{Dennis Chen \\ proofprogram@gmail.com}
+% \date{\fileversion{} (\filedate)}
+%
+% \maketitle
+%
+% \begin{abstract}
+% The \textsf{scrambledenvs} package allows you to create scrambled environments and print them out later, such as scrambled hints or solutions.
+% \end{abstract}
+%
+% \section{Overview}
+%
+% This package was designed to mark hints at a location\footnote{It can generalize beyond hints, but I thought it best to start off with a specific example..} and print them out later in a random order.\footnote{Though you do have the ability to make the order not random: pass in |noscramble| to the package.}
+%
+% There is an outer environment which typesets the label. Inside it you should place the inner environment \textbf{and only the inner environment}. Inside this inner environment, you write the contents of your hint. This will typeset the hint number. Finally, you may print the hints at some later location in a randomized order.
+%
+% \section{Usage}
+%
+% If you want your solutions to be scrambled, call
+% \begin{verbatim}
+%\usepackage{scrambledenvs}
+% \end{verbatim}
+%
+% If you want to disable all scrambling for any reason, call
+% \begin{verbatim}
+%\usepackage[noscramble]{scrambledenvs}
+% \end{verbatim}
+% \iffalse
+%<*main>
+\newif\ifscrambledenvs@scramble
+\scrambledenvs@scrambletrue
+
+\DeclareOption{nosscramble}{\scrambledenvs@scramblefalse}
+\ProcessOptions\relax
+
+%</main>
+% \fi
+%
+% \DescribeMacro{\newscrambledenv}
+%
+% In order to create a new scrambled environment, one should call |\newscrambledenv{envname}|. This requires that the macros |\envname| and |\envname|s be undefined, as well as the counters \textsf{envname}count and \textsf{envname}tempcount be undefined, as |\newscrambledenv| will define these.
+%
+% This defines the environments |`envname`s| and |`envname`|, and the macro |\print`envname`|, where |`envname'| denotes the value passed in to |\newscrambledenv|. Because this will get confusing fast, we will just assume that |`envname'| is |hint|, since this generalizes quite easily.
+%
+% Thus in this example, the environments |hints| and |hint| are defined, and the macro |\printhint| is defined.
+%
+% If any of these macros or counters are defined, the package will throw a custom error.
+%
+% ^^A At the start, surround everything in newscrambledenv (since everything in main goes there)
+% \iffalse
+%<*main>
+\newcommand\newscrambledenv[1]{
+    \scrambledenvs@check@macrodefined{print#1}
+    \scrambledenvs@check@envdefined{#1s}
+    \scrambledenvs@check@envdefined{#1}
+    \newcounter{scrambledenvs@#1@count}
+    \newcounter{scrambledenvs@#1@tempcount}
+%</main>
+%<*helper>
+\newcommand\scrambledenvs@check@macrodefined[1]{%
+    \ifcsname #1\endcsname
+    \PackageError{scrambledenvs}{The macro \@backslashchar #1\space cannot be defined,\MessageBreak
+    as the macro \@backslashchar #1 is already defined}{Remove any packages that define \@backslashchar #1,\MessageBreak
+    or choose a different name for your scrambled environment.}%
+    \fi
+}
+\newcommand\scrambledenvs@check@envdefined[1]{%
+    \ifcsname #1\endcsname
+    \PackageError{scrambledenvs}{The environment `#1' cannot be defined,\MessageBreak
+    as the macro \@backslashchar #1 is already defined}{Remove any packages that define `#1',\MessageBreak
+    or choose a different name for your scrambled environment.}%
+    \fi
+}
+%</helper>
+% \fi
+
+% \DescribeEnv{hints}
+
+% This is the outer environment. Depending on how many |hint| environments are put inside it, it will either typeset \textbf{Hints:} or \textbf{Hint:} with the numerical labels of the passed in hints following it.
+
+% You should put in nothing but the inner environment |hint|. (See the examples for a correct usage.)
+
+% \iffalse
+%<*main>
+\newenvironment{#1s}{%
+\setcounter{scrambledenvs@#1@tempcount}{0}%
+}
+{%
+\ifnum\csname c@scrambledenvs@#1@tempcount\endcsname=0
+\else
+    \ifnum\csname c@scrambledenvs@#1@tempcount\endcsname=1
+        {\csname scrambledenvs@#1labelformat\endcsname\MakeUppercase #1:}
+    \else
+        {\csname scrambledenvs@#1labelformat\endcsname\MakeUppercase #1s:}
+    \fi
+\fi
+}
+%</main>
+% \fi
+
+% \section{Examples}
+% In all of the examples, we use |hint| as our generic scrambled environment. 
+% \subsection{A barebones example}
+%\begin{verbatim}
+%\documentclass{article}
+%\usepackage{scrambledenvs}
+%\newscrambledenv{hint}
+%
+%\begin{document}
+%This is a really hard problem, so we provide hints.\begin{hints}
+%\begin{addhint}
+%This is a helpful hint.
+%\end{addhint}
+%\begin{addhint}
+%And another one!
+%\end{addhint}
+%\end{hints}
+%
+%\section{Hints printed}
+%
+%\printhint
+%
+%\end{document}
+%\end{verbatim}
+% \subsection{Changing hint formatting}
+% We omit the fluff from last time, such as parts of the preamble and the document.
+%\begin{verbatim}
+%
+%
+%\end{verbatim}
+% \subsection{Changing default formatting}
+%\begin{verbatim}
+%
+%
+%\end{verbatim}
+% ^^A At the end, close brace
+%\iffalse
+%<*main>
+}
+%</main>
+%\fi
+% \Finale
+\endinput

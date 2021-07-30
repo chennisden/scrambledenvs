@@ -1,0 +1,11 @@
+# Remove latex-generated files
+*.ins
+*.sty
+*.log
+*.aux
+*.idx
+*.glo
+
+# Glossary files
+*.gls
+*.ilg
