@@ -116,8 +116,9 @@ This package consists of the file scrambledenvs.dtx,
 %<*main>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{scrambledenvs}[2021/07/29 v1.0.0 Create and print scrambled environments]
-\RequirePackage{pgffor}
-\RequirePackage{xstring}
+\RequirePackage{forloop}
+\RequirePackage{pgfmath}
+\pgfmathsetseed{2407}
 %</main>
 %<*driver>
 \ProvidesFile{\jobname.dtx}[2021/07/29 v1.0.0 Create and print scrambled environments]
@@ -231,8 +232,8 @@ This package consists of the file scrambledenvs.dtx,
         {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\csname thescrambledenvs@#1@count\endcsname}}%
     \else
         {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname s:}%
-        \foreach \scrambledenvs@index in {\the\numexpr\csname thescrambledenvs@#1@count\endcsname-\csname thescrambledenvs@#1@tempcount\endcsname+1\relax, ..., \csname thescrambledenvs@#1@count\endcsname} {
-            {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\scrambledenvs@index}}%
+        \forloop{scrambledenvs@loopcount}{\the\numexpr\csname thescrambledenvs@#1@count\endcsname-\csname thescrambledenvs@#1@tempcount\endcsname+1\relax}{\value{scrambledenvs@loopcount}<\the\numexpr\csname thescrambledenvs@#1@count\endcsname+1\relax} {
+            {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\thescrambledenvs@loopcount}}%
         }
     \fi
 \fi
@@ -266,37 +267,30 @@ This package consists of the file scrambledenvs.dtx,
 % To print out the hints (either in a random or fixed order, depending on whether the option |noscrambled| is passed in), just write |\printhint|.
 %
 % \iffalse
+%<*helper>
+\newcounter{scrambledenvs@loopcount}
+%</helper>
 %<*main>
 \expandafter\newcommand\csname print#1\endcsname{%
     \ifscrambledenvs@scramble
         \ifcsname thescrambledenvs@#1@count\endcsname
-            \ifnum\csname thescrambledenvs@#1@count\endcsname>0\relax
-                %
-                % Construct initial list
-                %
-                \expandafter\def\csname scrambledenvs@#1@list\endcsname{}%
-                \foreach \scrambledenvs@index in {1, ..., \csname thescrambledenvs@#1@count\endcsname}{\expandafter\xdef\csname scrambledenvs@#1@list\endcsname{\csname scrambledenvs@#1@list\endcsname\noexpand{\scrambledenvs@index\noexpand}}}%
-                \pgfmathdeclarerandomlist{#1}{\csname scrambledenvs@#1@list\endcsname}%
-                %
-                % Move entries from initial list to random list, essentially
-                %
-                \foreach \scrambledenvs@index in {1, ..., \csname thescrambledenvs@#1@count\endcsname}{%
-                    \pgfmathrandomitem{\scrambledenvs@temprand}{#1}%
-                    \expandafter\xdef\csname scrambledenvs@#1@randlist@\scrambledenvs@index\endcsname{\scrambledenvs@temprand}%
-                    \StrSubstitute{\csname scrambledenvs@#1@list\endcsname}{{\scrambledenvs@temprand}}{}[\csname scrambledenvs@#1@templist\endcsname]%
-                    \global\expandafter\let\csname scrambledenvs@#1@list\expandafter\endcsname\csname scrambledenvs@#1@templist\endcsname%
-                    \pgfmathdeclarerandomlist{#1}{\csname scrambledenvs@#1@list\endcsname}
-                }%
+            \ifnum\value{scrambledenvs@#1@count}>0\relax
+                \expandafter\edef\csname pgfmath@randomlist@#1\endcsname{\value{scrambledenvs@#1@count}}%
+                \forloop{scrambledenvs@loopcount}{1}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax}{\expandafter\edef\csname pgfmath@randomlist@#1@\thescrambledenvs@loopcount\endcsname{\thescrambledenvs@loopcount}}%
                 \begin{scrambledenvs@#1@printenv}%
-                    \foreach \scrambledenvs@index in {1, ..., \csname thescrambledenvs@#1@count\endcsname} {\csname scrambledenvs@#1@printitem\endcsname\label{#1:\csname scrambledenvs@#1@randlist@\scrambledenvs@index\endcsname}\input{\jobname-\csname scrambledenvs@#1@randlist@\scrambledenvs@index\endcsname.#1}}%
+                    \forloop{scrambledenvs@loopcount}{0}{\value{scrambledenvs@loopcount}<\value{scrambledenvs@#1@count}}{%
+                        \pgfmathrandomitem\scrambledenvs@tempindex{#1}%
+                        \csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@tempindex}%
+                        \input{\jobname-\scrambledenvs@tempindex.#1}%
+                    }%
                 \end{scrambledenvs@#1@printenv}
             \fi
         \fi
     \else
-        \ifcsname c@scrambledenvs@#1@count\endcsname
-            \ifnum\csname c@scrambledenvs@#1@count\endcsname>0\relax
+        \ifcsname thescrambledenvs@#1@count\endcsname
+            \ifnum\value{scrambledenvs@#1@count}>0\relax
                 \begin{scrambledenvs@#1@printenv}%
-                    \foreach \scrambledenvs@index in {1, ..., \csname c@scrambledenvs@#1@count\endcsname} {\csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@index}\input{\jobname-\scrambledenvs@index.#1}}%
+                    \forloop{scrambledenvs@loopcount}{1}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax}{\csname scrambledenvs@#1@printitem\endcsname\label{#1:\thescrambledenvs@loopcount}\input{\jobname-\thescrambledenvs@loopcount.#1}}%
                 \end{scrambledenvs@#1@printenv}
             \fi
         \fi
