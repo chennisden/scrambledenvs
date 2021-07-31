@@ -225,14 +225,14 @@ This package consists of the file scrambledenvs.dtx,
     \unskip\ignorespaces%
 }
 {
-\ifnum\csname c@scrambledenvs@#1@tempcount\endcsname=0
+\ifnum\value{scrambledenvs@#1@tempcount}=0\relax
 \else
-    \ifnum\csname c@scrambledenvs@#1@tempcount\endcsname=1
+    \ifnum\value{scrambledenvs@#1@tempcount}=1\relax
         {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname :}
-        {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\csname thescrambledenvs@#1@count\endcsname}}%
+        {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\value{scrambledenvs@#1@count}}}%
     \else
         {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname s:}%
-        \forloop{scrambledenvs@loopcount}{\the\numexpr\csname thescrambledenvs@#1@count\endcsname-\csname thescrambledenvs@#1@tempcount\endcsname+1\relax}{\value{scrambledenvs@loopcount}<\the\numexpr\csname thescrambledenvs@#1@count\endcsname+1\relax} {
+        \forloop{scrambledenvs@loopcount}{\the\numexpr\value{scrambledenvs@#1@count}-\value{scrambledenvs@#1@tempcount}+1\relax}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax} {
             {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\thescrambledenvs@loopcount}}%
         }
     \fi
@@ -249,12 +249,12 @@ This package consists of the file scrambledenvs.dtx,
 \newenvironment{#1}{%
     \stepcounter{scrambledenvs@#1@tempcount}%
     \stepcounter{scrambledenvs@#1@count}%
-    \ifnum\pdfstrcmp{#1}{\scrambledenvs@active}=0
+    \ifnum\pdfstrcmp{#1}{\scrambledenvs@active}=0\relax
     \else
         \PackageError{scrambledenvs}{The inner environment `#1' must be inside the outer environment `#1s'}{}
     \fi
     \unskip%
-    \filecontents[overwrite]{\jobname-\csname thescrambledenvs@#1@count\endcsname.#1}%
+    \filecontents[overwrite]{\jobname-\the\value{scrambledenvs@#1@count}.#1}%
 }
 {%
     \endfilecontents
@@ -269,6 +269,7 @@ This package consists of the file scrambledenvs.dtx,
 % \iffalse
 %<*helper>
 \newcounter{scrambledenvs@loopcount}
+\newcounter{scrambledenvs@innerloopcount}
 %</helper>
 %<*main>
 \expandafter\newcommand\csname print#1\endcsname{%
@@ -282,6 +283,10 @@ This package consists of the file scrambledenvs.dtx,
                         \pgfmathrandomitem\scrambledenvs@tempindex{#1}%
                         \csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@tempindex}%
                         \input{\jobname-\scrambledenvs@tempindex.#1}%
+                        \forloop{scrambledenvs@innerloopcount}{\scrambledenvs@tempindex}{\value{scrambledenvs@innerloopcount}<\csname pgfmath@randomlist@#1\endcsname}{%
+                            \global\expandafter\let\csname pgfmath@randomlist@#1@\thescrambledenvs@innerloopcount\expandafter\endcsname\csname pgfmath@randomlist@#1@\the\numexpr\thescrambledenvs@innerloopcount+1\relax\endcsname%
+                        }%
+                        \expandafter\xdef\csname pgfmath@randomlist@#1\endcsname{\the\numexpr\csname pgfmath@randomlist@#1\endcsname-1\relax}%
                     }%
                 \end{scrambledenvs@#1@printenv}
             \fi
