@@ -268,17 +268,13 @@ This package consists of the file scrambledenvs.dtx,
 % To print out the hints (either in a random or fixed order, depending on whether the option |noscrambled| is passed in), just write |\printhint|.
 % \iffalse
 %<*main>
-%% End document hooks to write # of sol files to aux
-\AtEndDocument{
-    \immediate\write\@auxout{\string\expandafter\string\gdef\noexpand\csname scrambledenvs@#1@auxcount\noexpand\endcsname{\csname thescrambledenvs@#1@count\endcsname}}
-}
 \expandafter\newcommand\csname print#1\endcsname{%
     \ifscrambledenvs@scramble
     \else
-        \ifcsname scrambledenvs@#1@auxcount\endcsname
-            \ifnum\csname scrambledenvs@#1@auxcount\endcsname>0\relax
+        \ifcsname c@scrambledenvs@#1@count\endcsname
+            \ifnum\csname c@scrambledenvs@#1@count\endcsname>0\relax
                 \begin{scrambledenvs@#1@printenv}%
-                    \foreach \scrambledenvs@index in {1, ..., \csname scrambledenvs@#1@auxcount\endcsname} {\csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@index}\input{\jobname-\scrambledenvs@index.#1}}%
+                    \foreach \scrambledenvs@index in {1, ..., \csname c@scrambledenvs@#1@count\endcsname} {\csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@index}\input{\jobname-\scrambledenvs@index.#1}}%
                 \end{scrambledenvs@#1@printenv}
             \fi
         \fi
