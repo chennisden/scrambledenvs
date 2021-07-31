@@ -1,4 +1,4 @@
-# The LaTeX package scrambledenvs - version 1.0.0 (2021/07/29)
+# The LaTeX package scrambledenvs - version 1.0.0 (2021/07/31)
 
 **scrambledenvs** allows you to arbitrarily create and print scrambled environments (like scrambled hints in a book) and customize the output.
 

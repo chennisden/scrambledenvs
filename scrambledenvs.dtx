@@ -15,7 +15,7 @@
 \iffalse
 %</internal>
 %<*readme>
-# The LaTeX package scrambledenvs - version 1.0.0 (2021/07/29)
+# The LaTeX package scrambledenvs - version 1.0.0 (2021/07/31)
 
 **scrambledenvs** allows you to arbitrarily create and print scrambled environments (like scrambled hints in a book) and customize the output.
 
@@ -115,13 +115,13 @@ This package consists of the file scrambledenvs.dtx,
 %</internal>
 %<*main>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{scrambledenvs}[2021/07/29 v1.0.0 Create and print scrambled environments]
+\ProvidesPackage{scrambledenvs}[2021/07/31 v1.0.0 Create and print scrambled environments]
 \RequirePackage{forloop}
 \RequirePackage{pgfmath}
 \pgfmathsetseed{2407}
 %</main>
 %<*driver>
-\ProvidesFile{\jobname.dtx}[2021/07/29 v1.0.0 Create and print scrambled environments]
+\ProvidesFile{\jobname.dtx}[2021/07/31 v1.0.0 Create and print scrambled environments]
 \documentclass{ltxdoc}
 
 \EnableCrossrefs
@@ -136,7 +136,7 @@ This package consists of the file scrambledenvs.dtx,
 %</driver>
 % \fi
 % \GetFileInfo{\jobname.dtx}
-% \changes{v1.0.0}{2021/07/29}{Initial version}
+% \changes{v1.0.0}{2021/07/31}{Initial version}
 %
 % \renewcommand{\emph}[1]{\textbf{#1}}
 %
@@ -264,7 +264,7 @@ This package consists of the file scrambledenvs.dtx,
 %
 % \DescribeMacro{\printhint}
 %
-% To print out the hints (either in a random or fixed order, depending on whether the option |noscrambled| is passed in), just write |\printhint|.
+% To print out the hints (either in a random or fixed order, depending on whether the option |noscramble| is passed in), just write |\printhint|.
 %
 % \iffalse
 %<*helper>
@@ -273,7 +273,7 @@ This package consists of the file scrambledenvs.dtx,
 %</helper>
 %<*main>
 \expandafter\newcommand\csname print#1\endcsname{%
-    \ifscrambledenvs@scramble
+    \ifscrambledenvs@scramble %\if
         \ifcsname thescrambledenvs@#1@count\endcsname
             \ifnum\value{scrambledenvs@#1@count}>0\relax
                 \expandafter\edef\csname pgfmath@randomlist@#1\endcsname{\value{scrambledenvs@#1@count}}%
@@ -337,7 +337,7 @@ This package consists of the file scrambledenvs.dtx,
 % \DescribeMacro{\hintreffont}
 % Sets the font of the numerical references the follows the label.
 %
-% Because the references are generated with |\ref|, you must change hyperref colors in order to change the color. |\color| will not work.
+% If you are using hyperref and you are using the |colorlinks| option: because the references are generated with |\ref|, you must change hyperref colors in order to change the color. |\color| will not work. Otherwise |\color| will work.
 %
 % \iffalse
 %<*main>
@@ -439,15 +439,28 @@ This package consists of the file scrambledenvs.dtx,
 %\end{document}
 %\end{verbatim}
 % \subsection{Changing hint formatting}
-% We omit the fluff from last time, such as parts of the preamble and the document.
+% Changing default formatting is identical, except there is no way to change the label. (We do not include the document body since we have already shown how that works.)
 %\begin{verbatim}
-%
-%
+%\documentclass{article}
+%\usepackage{scrambledenvs}
+%\usepackage{xcolor}
+%\newscrambledenv{hint}
+%\hintlabel{tip}
+%\hintlabelfont{\textit}
+%\hintreffont{\color{blue}\bfseries}
+%\hintprintenv{\begin{enumerate}\small}{\end{enumerate}}
+%\hintprintitem{\bfseries\item}
 %\end{verbatim}
-% \subsection{Changing default formatting}
+% \subsection{Changing hintreffont color: hpyerrefs colorlink}
+% Since we are using |\ref| to typeset labels (which are set with |\label|), if we use |colorlinks| from package |hyperref| we must locally change the linkcolor in order to change the color the numbers are typeset in.
 %\begin{verbatim}
-%
-%
+%\documentclass{article}
+%\usepackage{scrambledenvs}
+%\usepackage{xcolor}
+%\usepackage{hyperref}
+%\hypersetup{colorlinks}
+%\newscrambledenv{hint}
+%\hintreffont{\hypersetup{linkcolor=blue}}
 %\end{verbatim}
 % ^^A At the end, close brace
 %\iffalse
