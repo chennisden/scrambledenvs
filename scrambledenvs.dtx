@@ -116,7 +116,6 @@ This package consists of the file scrambledenvs.dtx,
 %<*main>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{scrambledenvs}[2021/07/29 v1.0.0 Create and print scrambled environments]
-\RequirePackage{fancyvrb}
 \RequirePackage{pgffor}
 %</main>
 %<*driver>
@@ -255,13 +254,11 @@ This package consists of the file scrambledenvs.dtx,
     \else
         \PackageError{scrambledenvs}{The inner environment `#1' must be inside the outer environment `#1s'}{}
     \fi
-    \def\scrambledenvs@active{}
     \unskip%
-    \VerbatimOut{\jobname-\csname thescrambledenvs@#1@count\endcsname.#1}% This comment symbol is absolutely necessary; VerbatimOut will throw an error otherwise!
+    \filecontents[overwrite]{\jobname-\csname thescrambledenvs@#1@count\endcsname.#1}%
 }
 {%
-    \endVerbatimOut%
-    \def\scrambledenvs@active{#1}%
+    \endfilecontents
 }
 %</main>
 % \fi
@@ -273,12 +270,19 @@ This package consists of the file scrambledenvs.dtx,
 %<*main>
 %% End document hooks to write # of sol files to aux
 \AtEndDocument{
-    \immediate\write\@auxout{\string\gdef\noexpand\csname scrambledenvs@#1@auxcount\endcsname{\csname thescrambledenvs@#1@count\endcsname}}
+    \immediate\write\@auxout{\string\expandafter\string\gdef\noexpand\csname scrambledenvs@#1@auxcount\noexpand\endcsname{\csname thescrambledenvs@#1@count\endcsname}}
 }
-\newcommand{print#1}{%
-    \begin{scrambledenvs@#1@printenv}
-
-    \end{scrambledenvs@#1@printenv}%
+\expandafter\newcommand\csname print#1\endcsname{%
+    \ifscrambledenvs@scramble
+    \else
+        \ifcsname scrambledenvs@#1@auxcount\endcsname
+            \ifnum\csname scrambledenvs@#1@auxcount\endcsname>0\relax
+                \begin{scrambledenvs@#1@printenv}%
+                    \foreach \scrambledenvs@index in {1, ..., \csname scrambledenvs@#1@auxcount\endcsname} {\csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@index}\input{\jobname-\scrambledenvs@index.#1}}%
+                \end{scrambledenvs@#1@printenv}
+            \fi
+        \fi
+    \fi
 }
 %</main>
 % \fi
@@ -335,7 +339,7 @@ This package consists of the file scrambledenvs.dtx,
 %<*main>
 \newenvironment{scrambledenvs@#1@printenv}{\begin{scrambledenvs@printenv}}{\end{scrambledenvs@printenv}}
 \scrambledenvs@check@envdefined{#1printenv}
-\expandafter\def\csname #1printenv\endcsname#1#2{\renewenvironment{scrambledenvs@#1@printenv}{##1}{##2}}
+\expandafter\newcommand\csname #1printenv\endcsname[2]{\renewenvironment{scrambledenvs@#1@printenv}{##1}{##2}}
 %</main>
 % \fi
 %
@@ -347,7 +351,7 @@ This package consists of the file scrambledenvs.dtx,
 %<*main>
 \expandafter\def\csname scrambledenvs@#1@printitem\endcsname{\scrambledenvs@printitem}
 \scrambledenvs@check@macrodefined{#1printitem}
-\expandafter\def\csname #1printitem\endcsname#1{\expandafter\def\csname scrambledenvs@#1@printitem\endcsname{##1}}
+\expandafter\newcommand\csname #1printitem\endcsname[1]{\expandafter\def\csname scrambledenvs@#1@printitem\endcsname{##1}}
 %</main>
 % \fi
 %
