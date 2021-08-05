@@ -288,11 +288,11 @@ This package consists of the file scrambledenvs.dtx,
             \ifnum\value{scrambledenvs@#1@count}<\csname scrambledenvs@#1@start\endcsname\relax
             \else
                 \expandafter\edef\csname pgfmath@randomlist@#1\endcsname{\numexpr\value{scrambledenvs@#1@count}-\csname scrambledenvs@#1@start\endcsname+1}
-                    \count@\@ne
+                    \count@=1
                     \loop
                         \expandafter\edef\csname pgfmath@randomlist@#1@\the\count@\endcsname{\the\numexpr\count@+\csname scrambledenvs@#1@start\endcsname-1\relax}
                     \ifnum\count@<\numexpr\value{scrambledenvs@#1@count}-\csname scrambledenvs@#1@start\endcsname+1\relax
-                    \advance\count@\@ne
+                    \advance\count@ 1
                     \repeat
                 \begin{scrambledenvs@#1@printenv}
                     \setcounter{scrambledenvs@loopcount}{\csname scrambledenvs@#1@start\endcsname}
@@ -304,7 +304,7 @@ This package consists of the file scrambledenvs.dtx,
                         \count@\pgfmath@randomtemp
                         \loop
                             \global\expandafter\let\csname pgfmath@randomlist@#1@\the\count@\expandafter\endcsname\csname pgfmath@randomlist@#1@\the\numexpr\the\count@+1\relax\endcsname%
-                        \advance\count@\@ne
+                        \advance\count@ 1
                         \ifnum \count@ < \csname pgfmath@randomlist@#1\endcsname\relax
                         \repeat
                     \expandafter\xdef\csname pgfmath@randomlist@#1\endcsname{\the\numexpr\csname pgfmath@randomlist@#1\endcsname-1\relax}%
