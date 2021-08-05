@@ -120,6 +120,7 @@ This package consists of the file scrambledenvs.dtx,
 %<*main>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{scrambledenvs}[2021/08/03 v1.1.0 Create and print scrambled environments]
+\RequirePackage{ifthen}
 \RequirePackage{forloop}
 \RequirePackage{pgfmath}
 \pgfmathsetseed{2407}
@@ -217,7 +218,6 @@ This package consists of the file scrambledenvs.dtx,
 %</helper>
 % \fi
 % \DescribeEnv{hints}
-% \changes{v1.1.0}{2021/08/03}{Add ``the'' to value scrambledenvs in ref}
 % \changes{v1.0.1}{2021/08/03}{Adjust spacing to make two scrambled envs look prettier together}
 % This is the outer environment. Depending on how many |hint| environments are put inside it, it will either typeset \emph{Hints:} or \emph{Hint:} with the numerical labels of the passed in hints following it.
 % You should put in nothing but the inner environment |hint|. (See the examples for a correct usage.)
@@ -269,8 +269,11 @@ This package consists of the file scrambledenvs.dtx,
 % \fi
 %
 % \DescribeMacro{\printhint}
-%
+% \changes{v1.1.0}{2020/08/05}{Feature: printhint only outputs unprinted hints (allows for printhint in each chapter, etc)}
+% \changes{v1.1.0}{2020/08/05}{Bugfix: switch from forloop to TeX loops}
 % To print out the hints (either in a random or fixed order, depending on whether the option |noscramble| is passed in), just write |\printhint|.
+%
+% Only hints that have not been printed before will be printed. Therefore, in a book, you could write |\printhint| at the end of each chapter to get end-of-chapter hints.
 %
 % \iffalse
 %<*helper>
@@ -278,31 +281,45 @@ This package consists of the file scrambledenvs.dtx,
 \newcounter{scrambledenvs@innerloopcount}
 %</helper>
 %<*main>
+\expandafter\def\csname scrambledenvs@#1@start\endcsname{1}
 \expandafter\newcommand\csname print#1\endcsname{%
     \ifscrambledenvs@scramble %\if
         \ifcsname thescrambledenvs@#1@count\endcsname
-            \ifnum\value{scrambledenvs@#1@count}>0\relax
-                \expandafter\edef\csname pgfmath@randomlist@#1\endcsname{\value{scrambledenvs@#1@count}}%
-                \forloop{scrambledenvs@loopcount}{1}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax}{\expandafter\edef\csname pgfmath@randomlist@#1@\thescrambledenvs@loopcount\endcsname{\thescrambledenvs@loopcount}}%
-                \begin{scrambledenvs@#1@printenv}%
-                    \forloop{scrambledenvs@loopcount}{0}{\value{scrambledenvs@loopcount}<\value{scrambledenvs@#1@count}}{%
-                        \pgfmathrandomitem\scrambledenvs@tempindex{#1}%
-                        \csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@tempindex}%
+            \ifnum\value{scrambledenvs@#1@count}<\csname scrambledenvs@#1@start\endcsname\relax
+            \else
+                \expandafter\edef\csname pgfmath@randomlist@#1\endcsname{\numexpr\value{scrambledenvs@#1@count}-\csname scrambledenvs@#1@start\endcsname+1}
+                    \count@\@ne
+                    \loop
+                        \expandafter\edef\csname pgfmath@randomlist@#1@\the\count@\endcsname{\the\numexpr\count@+\csname scrambledenvs@#1@start\endcsname-1\relax}
+                    \ifnum\count@<\numexpr\value{scrambledenvs@#1@count}-\csname scrambledenvs@#1@start\endcsname+1\relax
+                    \advance\count@\@ne
+                    \repeat
+                \begin{scrambledenvs@#1@printenv}
+                    \setcounter{scrambledenvs@loopcount}{\csname scrambledenvs@#1@start\endcsname}
+                    \whiledo{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax}{%
+                    \stepcounter{scrambledenvs@loopcount}
+                    \pgfmathrandomitem\scrambledenvs@tempindex{#1}
+                    \csname scrambledenvs@#1@printitem\endcsname\label{#1:\scrambledenvs@tempindex}%
                         \input{\jobname-\scrambledenvs@tempindex.#1}%
-                        \forloop{scrambledenvs@innerloopcount}{\scrambledenvs@tempindex}{\value{scrambledenvs@innerloopcount}<\csname pgfmath@randomlist@#1\endcsname}{%
-                            \global\expandafter\let\csname pgfmath@randomlist@#1@\thescrambledenvs@innerloopcount\expandafter\endcsname\csname pgfmath@randomlist@#1@\the\numexpr\thescrambledenvs@innerloopcount+1\relax\endcsname%
-                        }%
-                        \expandafter\xdef\csname pgfmath@randomlist@#1\endcsname{\the\numexpr\csname pgfmath@randomlist@#1\endcsname-1\relax}%
-                    }%
+                        \count@\pgfmath@randomtemp
+                        \loop
+                            \global\expandafter\let\csname pgfmath@randomlist@#1@\the\count@\expandafter\endcsname\csname pgfmath@randomlist@#1@\the\numexpr\the\count@+1\relax\endcsname%
+                        \advance\count@\@ne
+                        \ifnum \count@ < \csname pgfmath@randomlist@#1\endcsname\relax
+                        \repeat
+                    \expandafter\xdef\csname pgfmath@randomlist@#1\endcsname{\the\numexpr\csname pgfmath@randomlist@#1\endcsname-1\relax}%
+                    }
                 \end{scrambledenvs@#1@printenv}
+                \expandafter\edef\csname scrambledenvs@#1@start\endcsname{\the\numexpr\value{scrambledenvs@#1@count}+1\relax}
             \fi
         \fi
     \else
         \ifcsname thescrambledenvs@#1@count\endcsname
             \ifnum\value{scrambledenvs@#1@count}>0\relax
                 \begin{scrambledenvs@#1@printenv}%
-                    \forloop{scrambledenvs@loopcount}{1}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax}{\csname scrambledenvs@#1@printitem\endcsname\label{#1:\thescrambledenvs@loopcount}\input{\jobname-\thescrambledenvs@loopcount.#1}}%
+                    \forloop{scrambledenvs@loopcount}{\csname scrambledenvs@#1@start\endcsname}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax}{\csname scrambledenvs@#1@printitem\endcsname\label{#1:\thescrambledenvs@loopcount}\input{\jobname-\thescrambledenvs@loopcount.#1}}%
                 \end{scrambledenvs@#1@printenv}
+                \expandafter\edef\csname scrambledenvs@#1@start\endcsname{\the\numexpr\value{scrambledenvs@#1@count}+1\relax}
             \fi
         \fi
     \fi
