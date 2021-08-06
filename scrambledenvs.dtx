@@ -235,11 +235,11 @@ This package consists of the file scrambledenvs.dtx,
 \else
     \ifnum\value{scrambledenvs@#1@tempcount}=1\relax
         {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname :}
-        {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\the\value{scrambledenvs@#1@count}}}%
+        {\csname scrambledenvs@#1@reffont\endcsname\csname scrambledenvs@#1@refprefix\endcsname\ref{#1:\the\value{scrambledenvs@#1@count}}}%
     \else
         {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname s:}
         \forloop{scrambledenvs@loopcount}{\the\numexpr\value{scrambledenvs@#1@count}-\value{scrambledenvs@#1@tempcount}+1\relax}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax} {%
-            {\csname scrambledenvs@#1@reffont\endcsname\ref{#1:\thescrambledenvs@loopcount}}
+            {\csname scrambledenvs@#1@reffont\endcsname\csname scrambledenvs@#1@refprefix\endcsname\ref{#1:\thescrambledenvs@loopcount}}
         }
     \fi
 \fi
@@ -275,6 +275,11 @@ This package consists of the file scrambledenvs.dtx,
 %
 % Only hints that have not been printed before will be printed. Therefore, in a book, you could write |\printhint| at the end of each chapter to get end-of-chapter hints.
 %
+% By default, the hint counter resets each time. So if you use |\printhint| twice, you will have two hint 1's, etc. If you want the counter to continue, the following code will work:
+%\begin{verbatim}
+%\hintprintenv{\begin{enumerate}\setcounter{enumi}{\the\numexpr\csname scrambledenvs@hint@start\endcsname-1\relax}}{\end{enumerate}}
+%\end{verbatim}
+% Wrap this with a |\makeatletter| |\makeatother| pair if appropriate (i.e. in TeX files).
 % \iffalse
 %<*helper>
 \newcounter{scrambledenvs@loopcount}
@@ -356,11 +361,23 @@ This package consists of the file scrambledenvs.dtx,
 \expandafter\newcommand\csname #1labelfont\endcsname[1]{\expandafter\def\csname scrambledenvs@#1@labelfont\endcsname{##1}}
 %</main>
 % \fi
+% \changes{v1.1.0}{2021/08/05}{Added ref prefix}
+% \DescribeMacro{\hintrefprefix}
+% Sets the prefix before the reference. (This may be useful if you have multiple |\printhint| statements, like one at the end of each chapter.)
 %
+% \iffalse
+%<*main>
+\expandafter\def\csname scrambledenvs@#1@refprefix\endcsname{\scrambledenvs@refprefix}
+\scrambledenvs@check@macrodefined{#1refprefix}
+\expandafter\newcommand\csname #1refprefix\endcsname[1]{\expandafter\def\csname scrambledenvs@#1@refprefix\endcsname{##1}}
+%</main>
+% \fi
 % \DescribeMacro{\hintreffont}
 % Sets the font of the numerical references the follows the label.
 %
 % If you are using hyperref and you are using the |colorlinks| option: because the references are generated with |\ref|, you must change hyperref colors in order to change the color. |\color| will not work. Otherwise |\color| will work.
+%
+% If you are using hyperref \emph{and} have a prefix, since the prefix is not part of the label, you must use \emph{both} |\hypersetup| and |\color|.
 %
 % \iffalse
 %<*main>
@@ -407,6 +424,15 @@ This package consists of the file scrambledenvs.dtx,
 %<*helper>
 \def\scrambledenvs@labelfont{\bfseries}
 \def\defaultlabelfont#1{\def\scrambledenvs@lineformat{#1}}
+%</helper>
+% \fi
+%
+% \DescribeMacro{\defaultrefprefix}
+% Changes the default reference prefix.
+% \iffalse
+%<*helper>
+\def\scrambledenvs@refprefix{}
+\def\defaultrefprefix#1{\def\scrambledenvs@refprefix{#1}}
 %</helper>
 % \fi
 %
@@ -474,7 +500,7 @@ This package consists of the file scrambledenvs.dtx,
 %\hintprintenv{\begin{enumerate}\small}{\end{enumerate}}
 %\hintprintitem{\bfseries\item}
 %\end{verbatim}
-% \subsection{Changing hintreffont color: hpyerrefs colorlink}
+% \subsection{Changing hintreffont color: hyperrefs colorlink}
 % Since we are using |\ref| to typeset labels (which are set with |\label|), if we use |colorlinks| from package |hyperref| we must locally change the linkcolor in order to change the color the numbers are typeset in.
 %\begin{verbatim}
 %\documentclass{article}
@@ -484,6 +510,37 @@ This package consists of the file scrambledenvs.dtx,
 %\hypersetup{colorlinks}
 %\newscrambledenv{hint}
 %\hintreffont{\hypersetup{linkcolor=blue}}
+%\end{verbatim}
+%\subsection{Changing hint ref prefix}
+%\begin{verbatim}
+%\documentclass{article}
+%\usepackage{scrambledenvs}
+%\usepackage{xcolor}
+%\usepackage{hyperref}
+%\hypersetup{colorlinks}
+%\newscrambledenv{hint}
+%\hintrefprefix{\thesection.}
+%\hintreffont{\color{blue}\hypersetup{linkcolor=blue}}
+%\begin{document}
+%\section{First Problem}
+%This is a problem.
+%\begin{hints}
+%\begin{hint}
+%This hint will be referenced as 1.1.
+%\end{hint}
+%\end{hints}
+%\subsection{Hints}
+%\printhint
+%\section{Second Problem}
+%This is another problem.
+%\begin{hints}
+%\begin{hint}
+%This hint will be referenced as 2.1.
+%\end{hint}
+%\end{hints}
+%\subsection{Hints}
+%\printhint
+%\end{document}
 %\end{verbatim}
 % ^^A At the end, close brace
 %\iffalse
