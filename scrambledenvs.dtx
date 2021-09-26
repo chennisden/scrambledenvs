@@ -15,7 +15,7 @@
 \iffalse
 %</internal>
 %<*readme>
-# The LaTeX package scrambledenvs - version 1.1.0 (2021/08/03)
+# The LaTeX package scrambledenvs - version 1.1.1 (2021/09/26)
 
 > Copyright (C) 2021 Dennis Chen proofprogram@gmail.com
 > 
@@ -119,14 +119,14 @@ This package consists of the file scrambledenvs.dtx,
 %</internal>
 %<*main>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{scrambledenvs}[2021/08/03 v1.1.0 Create and print scrambled environments]
+\ProvidesPackage{scrambledenvs}[2021/09/26 v1.1.1 Create and print scrambled environments]
 \RequirePackage{ifthen}
 \RequirePackage{forloop}
 \RequirePackage{pgfmath}
 \pgfmathsetseed{2407}
 %</main>
 %<*driver>
-\ProvidesFile{\jobname.dtx}[2021/08/03 v1.1.0 Create and print scrambled environments]
+\ProvidesFile{\jobname.dtx}[2021/09/26 v1.1.1 Create and print scrambled environments]
 \documentclass{ltxdoc}
 
 \EnableCrossrefs
@@ -218,6 +218,7 @@ This package consists of the file scrambledenvs.dtx,
 %</helper>
 % \fi
 % \DescribeEnv{hints}
+% \changes{v1.1.1}{2021/09/26}{Fix internal bug when referencing counters}
 % \changes{v1.0.1}{2021/08/03}{Adjust spacing to make two scrambled envs look prettier together}
 % This is the outer environment. Depending on how many |hint| environments are put inside it, it will either typeset \emph{Hints:} or \emph{Hint:} with the numerical labels of the passed in hints following it.
 % You should put in nothing but the inner environment |hint|. (See the examples for a correct usage.)
@@ -235,7 +236,7 @@ This package consists of the file scrambledenvs.dtx,
 \else
     \ifnum\value{scrambledenvs@#1@tempcount}=1\relax
         {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname :}
-        {\csname scrambledenvs@#1@reffont\endcsname\csname scrambledenvs@#1@refprefix\endcsname\ref{#1:\the\value{scrambledenvs@#1@count}}}%
+        {\csname scrambledenvs@#1@reffont\endcsname\csname scrambledenvs@#1@refprefix\endcsname\ref{#1:\the\numexpr\value{scrambledenvs@#1@count}}}%
     \else
         {\csname scrambledenvs@#1@labelfont\endcsname\csname scrambledenvs@#1@label\endcsname s:}
         \forloop{scrambledenvs@loopcount}{\the\numexpr\value{scrambledenvs@#1@count}-\value{scrambledenvs@#1@tempcount}+1\relax}{\value{scrambledenvs@loopcount}<\the\numexpr\value{scrambledenvs@#1@count}+1\relax} {%
