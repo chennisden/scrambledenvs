@@ -1,4 +1,4 @@
-# The LaTeX package scrambledenvs - version 1.1.1 (2021/09/26)
+# The LaTeX package scrambledenvs - version 1.1.0 (2021/09/26)
 
 > Copyright (C) 2021 Dennis Chen proofprogram@gmail.com
 >

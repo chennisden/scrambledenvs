@@ -15,7 +15,7 @@
 \iffalse
 %</internal>
 %<*readme>
-# The LaTeX package scrambledenvs - version 1.1.1 (2021/09/26)
+# The LaTeX package scrambledenvs - version 1.1.0 (2021/09/26)
 
 > Copyright (C) 2021 Dennis Chen proofprogram@gmail.com
 > 
@@ -119,14 +119,14 @@ This package consists of the file scrambledenvs.dtx,
 %</internal>
 %<*main>
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{scrambledenvs}[2021/09/26 v1.1.1 Create and print scrambled environments]
+\ProvidesPackage{scrambledenvs}[2021/09/26 v1.1.0 Create and print scrambled environments]
 \RequirePackage{ifthen}
 \RequirePackage{forloop}
 \RequirePackage{pgfmath}
 \pgfmathsetseed{2407}
 %</main>
 %<*driver>
-\ProvidesFile{\jobname.dtx}[2021/09/26 v1.1.1 Create and print scrambled environments]
+\ProvidesFile{\jobname.dtx}[2021/09/26 v1.1.0 Create and print scrambled environments]
 \documentclass{ltxdoc}
 
 \EnableCrossrefs
@@ -218,7 +218,7 @@ This package consists of the file scrambledenvs.dtx,
 %</helper>
 % \fi
 % \DescribeEnv{hints}
-% \changes{v1.1.1}{2021/09/26}{Fix internal bug when referencing counters}
+% \changes{v1.1.0}{2021/09/26}{Fix internal bug when referencing counters}
 % \changes{v1.0.1}{2021/08/03}{Adjust spacing to make two scrambled envs look prettier together}
 % This is the outer environment. Depending on how many |hint| environments are put inside it, it will either typeset \emph{Hints:} or \emph{Hint:} with the numerical labels of the passed in hints following it.
 % You should put in nothing but the inner environment |hint|. (See the examples for a correct usage.)
@@ -270,8 +270,8 @@ This package consists of the file scrambledenvs.dtx,
 % \fi
 %
 % \DescribeMacro{\printhint}
-% \changes{v1.1.0}{2020/08/05}{Feature: printhint only outputs unprinted hints (allows for printhint in each chapter, etc)}
-% \changes{v1.1.0}{2020/08/05}{Bugfix: switch from forloop to TeX loops}
+% \changes{v1.1.0}{2021/09/26}{Feature: printhint only outputs unprinted hints (allows for printhint in each chapter, etc)}
+% \changes{v1.1.0}{2021/09/26}{Bugfix: switch from forloop to TeX loops}
 % To print out the hints (either in a random or fixed order, depending on whether the option |noscramble| is passed in), just write |\printhint|.
 %
 % Only hints that have not been printed before will be printed. Therefore, in a book, you could write |\printhint| at the end of each chapter to get end-of-chapter hints.
@@ -362,7 +362,7 @@ This package consists of the file scrambledenvs.dtx,
 \expandafter\newcommand\csname #1labelfont\endcsname[1]{\expandafter\def\csname scrambledenvs@#1@labelfont\endcsname{##1}}
 %</main>
 % \fi
-% \changes{v1.1.0}{2021/08/05}{Added ref prefix}
+% \changes{v1.1.0}{2021/09/26}{Added ref prefix}
 % \DescribeMacro{\hintrefprefix}
 % Sets the prefix before the reference. (This may be useful if you have multiple |\printhint| statements, like one at the end of each chapter.)
 %
